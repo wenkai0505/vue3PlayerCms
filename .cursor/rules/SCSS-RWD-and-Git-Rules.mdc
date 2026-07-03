@@ -1,0 +1,57 @@
+---
+alwaysApply: true
+---
+
+# SCSS RWD and Git Rules
+
+## Styling
+
+* Use SCSS.
+* Prefer scoped SCSS.
+* Use existing mixins when available.
+* Do not introduce TailwindCSS unless requested.
+* Avoid inline styles.
+
+## Responsive Design
+
+All pages should support:
+
+* desktop
+* tablet
+* mobile
+
+Prefer:
+
+* flex
+* grid
+* percentage width
+* max-width
+* SCSS mixins
+
+Avoid:
+
+* unnecessary fixed width
+* desktop-only layout
+* hardcoded mobile hacks
+
+## Git Commit
+
+Use Conventional Commit format.
+
+Examples:
+
+```txt
+feat(home): add banner carousel
+fix(wallet): resolve withdraw validation
+refactor(api): optimize request handling
+style(home): adjust mobile spacing
+chore(config): update vite settings
+```
+
+Rules:
+
+* Commit message must be in English.
+* Review git diff before committing.
+* Suggest commit message first.
+* Do not push automatically unless explicitly requested.
+* If changes are unrelated, suggest splitting into multiple commits.

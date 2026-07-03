@@ -1,0 +1,79 @@
+---
+alwaysApply: true
+---
+
+# Vue3 Frontend Rules
+
+## Tech Stack
+
+This project uses:
+
+* Vue3
+* vue-router
+* TypeScript
+* Vite
+* Pinia
+* SCSS
+* Element Plus
+* Vant
+* Axios
+
+Always generate code based on this stack.
+
+## Vue
+
+* Use Vue3 Composition API.
+* Always use `<script setup lang="ts">`.
+* Avoid Options API.
+* Keep components readable and practical.
+* Prefer simple structure over over-engineering.
+
+## TypeScript
+
+* Prefer explicit typing when it improves readability.
+* Avoid `any` unless necessary.
+* Use interfaces for API response data.
+* Explicitly type refs when needed.
+
+Example:
+
+```ts
+const list = ref<GameItem[]>([])
+const isOpen = ref<boolean>(false)
+```
+
+## Naming
+
+Use clear and practical naming.
+
+API functions:
+
+```ts
+getHomeBannerApi()
+getCategoryListApi()
+```
+
+Event handlers:
+
+```ts
+handleOpenMenu()
+handleCloseMenu()
+handleClickCategory()
+handleSubmit()
+```
+
+Stores:
+
+```ts
+useBannerStore()
+useUserStore()
+useCategoryStore()
+```
+
+## Code Quality
+
+* Remove unused imports.
+* Avoid duplicated logic.
+* Extract reusable logic into `composables`.
+* Keep page components clean.
+* Do not create unnecessary abstraction.

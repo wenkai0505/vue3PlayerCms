@@ -1,0 +1,63 @@
+---
+alwaysApply: true
+---
+
+# API and Pinia Rules
+
+## API Folder
+
+API files must be placed in:
+
+```txt
+src/apis
+```
+
+Do not create a `services` folder unless specifically requested.
+
+Example:
+
+```ts
+// src/apis/banner.ts
+
+export const getBannerApi = () => {
+  return request.get('/banner')
+}
+```
+
+## Axios
+
+* Use the existing Axios/request wrapper.
+* Do not call Axios directly inside Vue components.
+* API functions should only handle request definitions.
+
+## Pinia
+
+Use Pinia only for shared global state.
+
+Suitable for Pinia:
+
+* user info
+* auth state
+* banner data
+* category data
+* global settings
+
+Avoid Pinia for page-only state, such as:
+
+* dialog open/close
+* local search keyword
+* current tab
+* temporary form state
+
+## Data Flow
+
+Preferred flow:
+
+```txt
+component
+→ composable or store
+→ apis
+→ request
+```
+
+Keep API logic out of templates and components when possible.
