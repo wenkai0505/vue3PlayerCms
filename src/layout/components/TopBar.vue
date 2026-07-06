@@ -1,10 +1,10 @@
 <template>
-    <div class="topBar">
-        <div class="topBar__left">
-            <img class="topBar__logo" :src="logo" alt="PLAYER CMS" />
+    <div class="topbar">
+        <div class="topbarLeft">
+            <img class="topbarLogo" :src="logo" alt="PLAYER CMS" />
         </div>
-        <div class="topBar__right">
-            <img class="topBar__avatar" :src="user.avatar" :alt="user.name" />
+        <div class="topbarRight">
+            <img class="topbarAvatar" :src="user.avatar" :alt="user.name" />
         </div>
     </div>
 </template>
@@ -21,26 +21,26 @@ const user = {
 </script>
 
 <style scoped lang="scss">
-.topBar {
-    @include flex;
-    justify-content: space-between;
-    height: var(--header-height);
+.topbar {
+    @include flex(center, space-between);
+    @include box(100%, var(--header-height));
+    flex-shrink: 0;
     padding: 12px;
     background: var(--dark-neutral-800);
 
-    &__left {
+    .topbarLeft {
         @include flex(center, flex-start);
     }
 
-    &__logo {
+    .topbarLogo {
         @include box(auto, 32px);
     }
 
-    &__right {
+    .topbarRight {
         @include flex;
     }
 
-    &__avatar {
+    .topbarAvatar {
         @include box(40px, 40px);
         border-radius: 50%;
         object-fit: cover;

@@ -1,9 +1,11 @@
 <template>
     <div class="layout">
         <SideBar />
-        <div class="layout__main">
+        <div class="layoutMain">
             <TopBar />
-            <router-view />
+            <main class="layoutContent">
+                <router-view />
+            </main>
         </div>
     </div>
 </template>
@@ -16,13 +18,25 @@ import SideBar from "./components/SideBar.vue";
 <style scoped lang="scss">
 .layout {
     @include flex(stretch, flex-start);
-    height: 100vh;
-    &__main {
+    @include box(100%, 100vh);
+    background: var(--dark-neutral-800);
+    overflow: hidden;
+
+    .layoutMain {
+        @include box(auto, 100%);
         @include flex(stretch, flex-start);
         flex-direction: column;
         flex: 1;
         min-width: 0;
-        overflow: hidden;
+        min-height: 0;
+        background: var(--dark-neutral-800);
+    }
+
+    .layoutContent {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 }
 </style>
