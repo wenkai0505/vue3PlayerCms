@@ -58,6 +58,8 @@
 
     <PlayerTagCreateModal
         v-model:open="isCreateModalOpen"
+        :tag-names="tagNames"
+        :excluded-player-ids="excludedPlayerIds"
         @save="handleCreateSave"
     />
 
@@ -73,13 +75,18 @@ import BaseField from "@/components/form/BaseField.vue";
 import PlayerTagNameModal from "./PlayerTagNameModal.vue";
 import PlayerTagCreateModal from "./PlayerTagCreateModal.vue";
 import PlayerTagBatchDeleteModal from "./PlayerTagBatchDeleteModal.vue";
-import type { PlayerTagNameItem } from "@/types/playerTag";
+import type {
+    CreatePlayerTagPayload,
+    PlayerTagNameItem,
+} from "@/types/playerTag";
 
 interface Props {
     keyword?: string;
     tagName?: string;
     country?: string;
     tagOptions?: string[];
+    tagNames?: PlayerTagNameItem[];
+    excludedPlayerIds?: string[];
     countryOptions?: string[];
 }
 
@@ -88,6 +95,8 @@ const props = withDefaults(defineProps<Props>(), {
     tagName: "",
     country: "",
     tagOptions: () => [],
+    tagNames: () => [],
+    excludedPlayerIds: () => [],
     countryOptions: () => [],
 });
 
@@ -98,6 +107,8 @@ const emit = defineEmits<{
     (e: "search"): void;
     (e: "filter"): void;
     (e: "save-tag-names", items: PlayerTagNameItem[]): void;
+    (e: "batch-delete", ids: string[]): void;
+    (e: "create", payload: CreatePlayerTagPayload): void;
 }>();
 
 const isTagNameModalOpen = ref(false);
@@ -154,18 +165,13 @@ const handleTagNameSave = (items: PlayerTagNameItem[]) => {
     isTagNameModalOpen.value = false;
 };
 
-const handleCreateSave = (payload: {
-    keyword: string;
-    content: string;
-    note: string;
-    tagColor: string;
-}) => {
-    console.log("create player tag layout", payload);
+const handleCreateSave = (payload: CreatePlayerTagPayload) => {
+    emit("create", payload);
     isCreateModalOpen.value = false;
 };
 
 const handleBatchDeleteSave = (ids: string[]) => {
-    console.log("batch delete layout", ids);
+    emit("batch-delete", ids);
     isBatchDeleteModalOpen.value = false;
 };
 </script>

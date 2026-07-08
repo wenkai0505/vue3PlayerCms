@@ -2,10 +2,17 @@
     <section class="tagTableWrap">
         <section class="tagTable">
             <header class="tableHead">
-                <div class="tableCell colTag">標籤</div>
-                <div class="tableCell colName">名稱</div>
-                <div class="tableCell colCountry">國家</div>
-                <div class="tableCell colTime">修改時間</div>
+                <div
+                    class="tableCell colTag sortable"
+                    v-for="title in tableHeadTitles"
+                    :key="title.key"
+                >
+                    {{ title.label }}
+                    <div class="sortArrows" @click.stop="handleSort(title.key)">
+                        <span class="sortArrowUp"></span>
+                        <span class="sortArrowDown"></span>
+                    </div>
+                </div>
             </header>
 
             <div class="tableBody">
@@ -90,6 +97,7 @@
                         v-show="isExpanded(row.id)"
                         :note="row.note"
                         :tag-color="row.tagColor"
+                        :tag-names="tagNames"
                         @update:note="row.note = $event"
                         @update:tag-color="
                             row.tagColor = $event as PlayerTagRow['tagColor']
@@ -171,7 +179,14 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import PlayerTagEditPanel from "./PlayerTagEditPanel.vue";
-import type { PlayerTagRow } from "@/types/playerTag";
+import type { TableHeadTitles } from "@/types/playerTag";
+
+import type {
+    PlayerTagRow,
+    PlayerTagSortField,
+    SortOrder,
+    PlayerTagNameItem,
+} from "@/types/playerTag";
 
 interface Props {
     rows: PlayerTagRow[];
@@ -179,16 +194,41 @@ interface Props {
     page: number;
     pageSize: number;
     total: number;
+    sortBy?: PlayerTagSortField;
+    sortOrder?: SortOrder;
+    tagNames?: PlayerTagNameItem[];
 }
+const tableHeadTitles: TableHeadTitles[] = [
+    {
+        label: "標籤",
+        key: "tagName",
+    },
+    {
+        label: "名稱",
+        key: "playerName",
+    },
+    {
+        label: "國家",
+        key: "country",
+    },
+    {
+        label: "修改時間",
+        key: "modifiedAt",
+    },
+];
 
 const props = withDefaults(defineProps<Props>(), {
     loading: false,
+    sortBy: "modifiedAt",
+    sortOrder: "desc",
+    tagNames: () => [],
 });
 
 const emit = defineEmits<{
     (e: "save", row: PlayerTagRow): void;
     (e: "delete", row: PlayerTagRow): void;
     (e: "page-change", page: number): void;
+    (e: "sort-change", sortBy: PlayerTagSortField, sortOrder: SortOrder): void;
 }>();
 
 const expandedId = ref<string | null>(null);
@@ -228,6 +268,15 @@ watch(
     },
 );
 
+const handleSort = (field: PlayerTagSortField) => {
+    if (props.sortBy === field) {
+        const nextOrder: SortOrder = props.sortOrder === "asc" ? "desc" : "asc";
+        emit("sort-change", field, nextOrder);
+        return;
+    }
+    emit("sort-change", field, "asc");
+};
+
 const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages.value || page === props.page) return;
     emit("page-change", page);
@@ -252,9 +301,6 @@ const handleSave = (row: PlayerTagRow) => {
 
 const handleDelete = (row: PlayerTagRow) => {
     emit("delete", row);
-    if (expandedId.value === row.id) {
-        expandedId.value = null;
-    }
 };
 </script>
 
@@ -293,6 +339,28 @@ const handleDelete = (row: PlayerTagRow) => {
 
         @include pad {
             min-width: 640px;
+        }
+
+        .sortLabel {
+            color: inherit;
+        }
+
+        .sortable {
+            @include flex(center, space-between);
+            .sortArrows {
+                @include box(20px, 20px, static);
+                cursor: pointer;
+                .sortArrowUp {
+                    @include box(20px, 10px, static);
+                    display: block;
+                    background: url("@/assets/arrorUp.svg") center no-repeat;
+                }
+                .sortArrowDown {
+                    @include box(20px, 10px, static);
+                    display: block;
+                    background: url("@/assets/arrorDown.svg") center no-repeat;
+                }
+            }
         }
     }
 
@@ -351,6 +419,10 @@ const handleDelete = (row: PlayerTagRow) => {
 
         @include pad {
             min-width: 640px;
+        }
+
+        .colTime {
+            color: var(--text-secondary);
         }
     }
 
@@ -495,7 +567,6 @@ const handleDelete = (row: PlayerTagRow) => {
 
     .colTime {
         width: 24%;
-        color: var(--text-secondary);
     }
 }
 

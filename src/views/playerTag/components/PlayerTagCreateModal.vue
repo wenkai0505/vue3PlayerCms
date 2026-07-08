@@ -29,11 +29,36 @@
                     <img :src="searchIcon" alt="" />
                 </span>
                 <input
-                    v-model="form.keyword"
+                    v-model="keyword"
                     class="tagCreateInput"
                     type="text"
-                    placeholder="搜尋遊戲、玩家..."
+                    placeholder="搜尋玩家名稱 / 國家"
+                    @input="handleSearchInput"
                 />
+            </div>
+
+            <div v-if="keyword.trim()">
+                <div class="tagCreatePlayers" v-if="playerOptions.length > 0">
+                    <button
+                        v-for="player in playerOptions"
+                        :key="player.id"
+                        type="button"
+                        class="tagCreatePlayerItem"
+                        :class="{ isActive: form.playerId === player.id }"
+                        @click="handleSelectPlayer(player)"
+                    >
+                        <span class="playerName">{{ player.name }}</span>
+                        <span class="playerCountry">{{ player.country }}</span>
+                    </button>
+                </div>
+
+                <div class="tagCreateEmpty" v-else-if="!loadingPlayers">
+                    找不到符合的玩家
+                </div>
+
+                <div class="tagCreateEmpty" v-if="loadingPlayers">
+                    載入中...
+                </div>
             </div>
 
             <div class="tagCreateField">
@@ -59,13 +84,14 @@
 
             <div class="tagCreateColors">
                 <button
-                    v-for="color in colorOptions"
-                    :key="color"
+                    v-for="item in tagNames"
+                    :key="item.id"
                     type="button"
                     class="tagCreateColorBtn"
-                    :class="{ isActive: form.tagColor === color }"
-                    :style="{ background: color }"
-                    @click="form.tagColor = color"
+                    :class="{ isActive: form.tagId === item.id }"
+                    :style="{ background: item.tagColor }"
+                    :title="item.tagName"
+                    @click="form.tagId = item.id"
                 ></button>
             </div>
         </div>
@@ -82,6 +108,7 @@
                 <button
                     type="button"
                     class="tagCreateBtn tagCreateBtnPrimary"
+                    :disabled="!canSave"
                     @click="handleSave"
                 >
                     保存
@@ -95,48 +122,90 @@
 import { computed, ref, watch } from "vue";
 import editNoteIcon from "@/assets/editNoteIcon.svg";
 import searchIcon from "@/assets/search.svg";
-import { playerTagColors } from "@/types/playerTag";
-import type { PlayerTagColor } from "@/types/playerTag";
+import { searchPlayersApi } from "@/apis/player";
+import type { PlayerListItem } from "@/types/player";
+import type {
+    CreatePlayerTagPayload,
+    PlayerTagNameItem,
+} from "@/types/playerTag";
 
 interface Props {
     open?: boolean;
-}
-
-interface CreateFormState {
-    keyword: string;
-    content: string;
-    note: string;
-    tagColor: PlayerTagColor;
+    tagNames?: PlayerTagNameItem[];
+    excludedPlayerIds?: string[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
     open: false,
+    tagNames: () => [],
+    excludedPlayerIds: () => [],
 });
 
 const emit = defineEmits<{
     (e: "update:open", value: boolean): void;
     (e: "close"): void;
-    (e: "save", payload: CreateFormState): void;
+    (e: "save", payload: CreatePlayerTagPayload): void;
 }>();
-
-const colorOptions = [...playerTagColors];
-
-const createDefaultForm = (): CreateFormState => ({
-    keyword: "",
-    content: "",
-    note: "",
-    tagColor: "#FF8B00",
-});
-
-const form = ref<CreateFormState>(createDefaultForm());
 
 const visible = computed({
     get: () => props.open,
     set: (value: boolean) => emit("update:open", value),
 });
 
+const keyword = ref("");
+const playerOptions = ref<PlayerListItem[]>([]);
+const loadingPlayers = ref(false);
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+const form = ref<CreatePlayerTagPayload>({
+    playerId: "",
+    tagId: props.tagNames[0]?.id ?? "",
+    content: "",
+    note: "",
+});
+
+const canSave = computed(
+    () => Boolean(form.value.playerId) && Boolean(form.value.tagId),
+);
+
+const fetchPlayers = async () => {
+    const kw = keyword.value.trim();
+    if (!kw) {
+        playerOptions.value = [];
+        loadingPlayers.value = false;
+        return;
+    }
+
+    loadingPlayers.value = true;
+    try {
+        const res = await searchPlayersApi({
+            keyword: kw,
+        });
+
+        playerOptions.value = res.list.filter(
+            (player) => !props.excludedPlayerIds.includes(player.id),
+        );
+    } catch (error) {
+        console.error(error);
+        playerOptions.value = [];
+    } finally {
+        loadingPlayers.value = false;
+    }
+};
+
+const handleSelectPlayer = (player: PlayerListItem) => {
+    form.value.playerId = player.id;
+};
+
 const resetForm = () => {
-    form.value = createDefaultForm();
+    keyword.value = "";
+    playerOptions.value = [];
+    form.value = {
+        playerId: "",
+        tagId: props.tagNames[0]?.id ?? "",
+        content: "",
+        note: "",
+    };
 };
 
 watch(
@@ -148,13 +217,38 @@ watch(
     },
 );
 
+watch(
+    () => props.tagNames,
+    (value) => {
+        const firstTag = value[0];
+        if (!form.value.tagId && firstTag) {
+            form.value.tagId = firstTag.id;
+        }
+    },
+    { deep: true },
+);
+
+const handleSearchInput = () => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        fetchPlayers();
+    }, 300);
+};
+
 const handleClose = () => {
     visible.value = false;
     emit("close");
 };
 
 const handleSave = () => {
-    emit("save", { ...form.value });
+    if (!canSave.value) return;
+
+    emit("save", {
+        playerId: form.value.playerId,
+        tagId: form.value.tagId,
+        content: form.value.content.trim(),
+        note: form.value.note.trim(),
+    });
 };
 </script>
 
@@ -226,6 +320,49 @@ const handleSave = () => {
         color: var(--gray-500);
         font-weight: 400;
     }
+
+    &:disabled {
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+}
+
+.tagCreatePlayers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.tagCreatePlayerItem {
+    @include flex(center, space-between);
+    @include box(100%, 36px);
+    padding: 0 10px;
+    border: 1px solid var(--dark-neutral-700);
+    border-radius: 10px;
+    background: var(--dark-neutral-900);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    &.isActive {
+        border-color: rgba(169, 96, 248, 0.8);
+    }
+
+    .playerName {
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .playerCountry {
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+}
+
+.tagCreateEmpty {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
 }
 
 .tagCreateNoteWrap {
@@ -314,6 +451,11 @@ const handleSave = () => {
         line-height: 16px;
         white-space: nowrap;
         cursor: pointer;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     }
 
     .tagCreateBtnGhost {

@@ -6,6 +6,12 @@ import type {
     UpdatePlayerTagNamePayload,
     PlayerTagFilterOptionsResponse,
     PlayerTagCountryOptionsResponse,
+    BatchDeletePlayerTagPayload,
+    BatchDeletePlayerTagResponse,
+    UpdatePlayerTagPayload,
+    UpdatePlayerTagResponse,
+    CreatePlayerTagPayload,
+    CreatePlayerTagResponse,
 } from "@/types/playerTag";
 
 export const getPlayerTagListApi = (
@@ -50,3 +56,33 @@ export const getPlayerTagCountryOptionsApi =
             method: "GET",
         });
     };
+
+export const batchDeletePlayerTagsApi = (
+    payload: BatchDeletePlayerTagPayload,
+): Promise<BatchDeletePlayerTagResponse> => {
+    return request({
+        url: "/playerTag/batch-delete",
+        method: "POST",
+        data: payload,
+    });
+};
+
+export const updatePlayerTagApi = (
+    payload: UpdatePlayerTagPayload,
+): Promise<UpdatePlayerTagResponse> => {
+    return request({
+        url: "/playerTag/item",
+        method: "PUT",
+        data: payload,
+    });
+};
+
+export const createPlayerTagApi = (
+    payload: CreatePlayerTagPayload,
+): Promise<CreatePlayerTagResponse> => {
+    return request({
+        url: "/playerTag/item",
+        method: "POST",
+        data: payload,
+    });
+};
