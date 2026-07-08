@@ -100,7 +100,12 @@ const menuList = [
         icon: iconPlayerTag,
         path: "/player-tag",
     },
-    { key: "profile", label: "個人資料", icon: iconProfile, path: "/profile" },
+    {
+        key: "player-profile",
+        label: "個人資料",
+        icon: iconProfile,
+        path: "/player-profile",
+    },
     {
         key: "backpack",
         label: "背包道具",
