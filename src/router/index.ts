@@ -11,6 +11,10 @@ const router = createRouter({
                     path: "player-tag",
                     component: () => import("@/views/playerTag/index.vue"),
                 },
+                {
+                    path: "player-profile",
+                    component: () => import("@/views/playerProfile/index.vue"),
+                },
             ],
         },
     ],

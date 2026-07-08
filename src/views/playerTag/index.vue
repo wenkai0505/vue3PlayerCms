@@ -1,41 +1,39 @@
 <template>
-    <div class="tagPage">
-        <section class="tagSurface">
-            <PlayerTagToolbar
-                :keyword="query.keyword"
-                :tag-name="query.tagName"
-                :country="query.country"
-                :tag-options="tagOptions"
+    <PageSurface>
+        <PlayerTagToolbar
+            :keyword="query.keyword"
+            :tag-name="query.tagName"
+            :country="query.country"
+            :tag-options="tagOptions"
+            :tag-names="tagNames"
+            :excluded-player-ids="excludedPlayerIds"
+            :country-options="countryOptions"
+            @update:keyword="query.keyword = $event"
+            @update:tag-name="query.tagName = $event"
+            @update:country="query.country = $event"
+            @search="handleSearch"
+            @filter="handleFilter"
+            @save-tag-names="handleSaveTagNames"
+            @batch-delete="handleBatchDelete"
+            @create="handleCreate"
+        />
+        <div class="tagContent">
+            <PlayerTagTable
+                :rows="rows"
+                :loading="loading"
+                :page="query.page"
+                :page-size="query.pageSize"
+                :total="total"
+                :sort-by="query.sortBy"
+                :sort-order="query.sortOrder"
                 :tag-names="tagNames"
-                :excluded-player-ids="excludedPlayerIds"
-                :country-options="countryOptions"
-                @update:keyword="query.keyword = $event"
-                @update:tag-name="query.tagName = $event"
-                @update:country="query.country = $event"
-                @search="handleSearch"
-                @filter="handleFilter"
-                @save-tag-names="handleSaveTagNames"
-                @batch-delete="handleBatchDelete"
-                @create="handleCreate"
+                @save="handleSave"
+                @delete="handleDelete"
+                @page-change="handlePageChange"
+                @sort-change="handleSortChange"
             />
-            <div class="tagContent">
-                <PlayerTagTable
-                    :rows="rows"
-                    :loading="loading"
-                    :page="query.page"
-                    :page-size="query.pageSize"
-                    :total="total"
-                    :sort-by="query.sortBy"
-                    :sort-order="query.sortOrder"
-                    :tag-names="tagNames"
-                    @save="handleSave"
-                    @delete="handleDelete"
-                    @page-change="handlePageChange"
-                    @sort-change="handleSortChange"
-                />
-            </div>
-        </section>
-    </div>
+        </div>
+    </PageSurface>
 </template>
 
 <script setup lang="ts">
@@ -43,6 +41,7 @@ import { computed, onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import PlayerTagToolbar from "./components/PlayerTagToolbar.vue";
 import PlayerTagTable from "./components/PlayerTagTable.vue";
+import PageSurface from "@/components/layout/PageSurface.vue";
 import {
     getPlayerTagListApi,
     getPlayerTagNamesApi,
@@ -249,37 +248,9 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.tagPage {
+.tagContent {
     @include box(100%, auto);
-    min-height: 100%;
+    flex: 1;
     min-width: 0;
-    background: var(--dark-neutral-800);
-
-    .tagSurface {
-        @include box(100%, 100%);
-        @include flex(stretch, flex-start);
-        flex-direction: column;
-        gap: 12px;
-        background: var(--dark-neutral-900);
-        border-radius: var(--radius-md);
-        padding: 12px;
-        min-width: 0;
-
-        @include mobile {
-            gap: 8px;
-            padding: 8px;
-            border-radius: 0;
-        }
-
-        @include pad {
-            padding: 10px;
-        }
-    }
-
-    .tagContent {
-        @include box(100%, auto);
-        flex: 1;
-        min-width: 0;
-    }
 }
 </style>
