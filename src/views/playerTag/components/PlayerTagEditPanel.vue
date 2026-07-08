@@ -47,25 +47,29 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import editNoteIcon from "@/assets/editNoteIcon.svg";
-import { playerTagColors } from "@/types/playerTag";
-import type { PlayerTagColor } from "@/types/playerTag";
+import type { PlayerTagNameItem } from "@/types/playerTag";
 
 interface Props {
     note?: string;
-    tagColor?: PlayerTagColor;
-    colorOptions?: PlayerTagColor[];
+    tagColor?: string;
+    tagNames?: PlayerTagNameItem[];
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     note: "",
-    tagColor: "#00C7E6",
-    colorOptions: () => [...playerTagColors],
+    tagColor: "",
+    tagNames: () => [],
 });
+
+const colorOptions = computed(() =>
+    props.tagNames.map((item) => item.tagColor),
+);
 
 const emit = defineEmits<{
     (e: "update:note", value: string): void;
-    (e: "update:tagColor", value: PlayerTagColor): void;
+    (e: "update:tagColor", value: string): void;
     (e: "save"): void;
     (e: "delete"): void;
 }>();

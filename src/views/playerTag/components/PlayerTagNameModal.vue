@@ -100,7 +100,6 @@ const fetchTagNames = async () => {
     } catch (error) {
         console.error(error);
 
-        //@ts-ignore
         ElMessage({
             message: "標籤名稱載入失敗",
             type: "error",
@@ -127,7 +126,6 @@ const handleClose = () => {
 const handleSave = () => {
     const hasEmpty = tagItems.value.some((item) => !item.tagName.trim());
     if (hasEmpty) {
-        //@ts-ignore
         ElMessage({
             message: "標籤名稱不可為空",
             type: "warning",

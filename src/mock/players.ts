@@ -1,0 +1,27 @@
+import type { PlayerListItem } from "@/types/player";
+
+export const mockPlayers: PlayerListItem[] = [
+    { id: "p1", name: "LeBron", country: "台灣" },
+    { id: "p4", name: "Luka", country: "澳門" },
+    { id: "p5", name: "Steph", country: "馬來西亞" },
+    { id: "p6", name: "Jimmy", country: "新加坡" },
+    { id: "p7", name: "Kobe", country: "台灣" },
+    { id: "p8", name: "Jordan", country: "中國" },
+    { id: "p9", name: "Giannis", country: "香港" },
+    { id: "p10", name: "Kevin", country: "日本" },
+    { id: "p11", name: "Irving", country: "韓國" },
+    { id: "p12", name: "Nikola", country: "台灣" },
+    { id: "p13", name: "Zion", country: "澳門" },
+    { id: "p14", name: "Chris", country: "馬來西亞" },
+    { id: "p15", name: "James", country: "新加坡" },
+    { id: "p16", name: "Ja", country: "香港" },
+    { id: "p17", name: "Tatum", country: "日本" },
+    { id: "p18", name: "Doncic", country: "韓國" },
+    { id: "p19", name: "Embiid", country: "台灣" },
+    { id: "p20", name: "Westbrook", country: "中國" },
+    { id: "p21", name: "Harden", country: "香港" },
+    { id: "p22", name: "Paul", country: "日本" },
+    { id: "p23", name: "Davis", country: "韓國" },
+    { id: "p24", name: "George", country: "台灣" },
+    { id: "p25", name: "Curry", country: "中國" },
+];

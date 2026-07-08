@@ -29,16 +29,28 @@ request.interceptors.response.use(
         // 超出 2xx 范围的状态码都会触发该函数。
         // 对响应错误做点什么
 
-        const message =
+        const status = error?.response?.status;
+        const rawMessage =
             error?.response?.data?.message ??
             error?.message ??
             "請求失敗，請稍後再試";
 
+        // 某些頁面會自行處理業務錯誤訊息，避免重複彈窗
+        const shouldSkipGlobalMessage =
+            status === 409 && rawMessage === "Player tag already exists";
+
+        const mappedMessage =
+            rawMessage === "Player tag already exists"
+                ? "此玩家已在標記列表中，請選擇其他玩家"
+                : rawMessage;
+
         //統一錯誤處理
-        ElMessage({
-            message: message,
-            type: "error",
-        });
+        if (!shouldSkipGlobalMessage) {
+            ElMessage({
+                message: mappedMessage,
+                type: "error",
+            });
+        }
         return Promise.reject(error);
     },
 );
