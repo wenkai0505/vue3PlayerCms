@@ -3,7 +3,7 @@ import type { PlayerProfile } from "@/types/playerProfile";
 export const mockPlayerProfiles: Record<string, PlayerProfile> = {
     p100: {
         playerId: "p100",
-        avatarUrl: "/src/assets/avatarUser.png",
+        avatarUrl: "/avatarUser.png",
         countryCode: "TW",
         statusBadges: [
             { variant: "normal", label: "正常" },
