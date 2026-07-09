@@ -9,19 +9,20 @@
                 aria-label="複製"
                 @click="handleCopy"
             >
-                <svg viewBox="0 0 15 18" aria-hidden="true">
-                    <path
-                        d="M4 0h8a2 2 0 0 1 2 2v10h-2V2H4V0Zm-2 4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2h-2v2H2V6h2Z"
-                        fill="currentColor"
-                    />
-                </svg>
+                <img
+                    class="copyFieldIcon"
+                    :src="copyIcon"
+                    alt=""
+                    aria-hidden="true"
+                />
             </button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ElMessage } from "element-plus";
+import copyIcon from "@/assets/copy.svg";
+import { copyToClipboard } from "@/utils/copyToClipboard";
 
 interface Props {
     label: string;
@@ -30,13 +31,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const handleCopy = async () => {
-    try {
-        await navigator.clipboard.writeText(props.value);
-        ElMessage.success("已複製");
-    } catch {
-        ElMessage.error("複製失敗");
-    }
+const handleCopy = () => {
+    copyToClipboard(props.value);
 };
 </script>
 
@@ -82,12 +78,12 @@ const handleCopy = async () => {
     border: 0;
     border-radius: 50%;
     background: #34384a;
-    color: var(--text-secondary);
     cursor: pointer;
+}
 
-    svg {
-        width: 15px;
-        height: 18px;
-    }
+.copyFieldIcon {
+    width: 15px;
+    height: 18px;
+    display: block;
 }
 </style>
