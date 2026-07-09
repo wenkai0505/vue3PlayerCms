@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     BaseField: typeof import('./src/components/form/BaseField.vue')['default']
     ElDialog: typeof import('element-plus/es')['ElDialog']
+    FeatureUnderDevelopment: typeof import('./src/components/common/FeatureUnderDevelopment.vue')['default']
     PageSurface: typeof import('./src/components/layout/PageSurface.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
