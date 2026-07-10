@@ -16,6 +16,37 @@
     margin: 0 auto;
 }
 
+/** 半透明邊框按鈕（取消、icon、次要操作） */
+@mixin overlay-btn {
+    border: 0.5px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--surface-overlay);
+    color: var(--text-primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-overlay);
+}
+
+/** 主色漸層按鈕（CTA、確認） */
+@mixin primary-btn {
+    border: 0;
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    cursor: pointer;
+    background: linear-gradient(
+        161deg,
+        var(--color-primary-grad-from) 0%,
+        var(--color-primary-grad-to) 100%
+    );
+    box-shadow: var(--shadow-primary-inset);
+}
+
+/** 本站常用 13px / 700 文字 */
+@mixin text-body-bold {
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    line-height: var(--font-line-body);
+}
+
 @mixin mobile {
     @media (max-width: #{768px - 1px}) {
         @content;

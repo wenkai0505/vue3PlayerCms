@@ -6,6 +6,7 @@ const router = createRouter({
         {
             path: "/",
             component: () => import("@/layout/index.vue"),
+            redirect: "timeline",
             children: [
                 {
                     path: "timeline",

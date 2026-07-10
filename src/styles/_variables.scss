@@ -20,15 +20,42 @@
     /* 表面 / 邊框 */
     --surface-overlay: rgba(255, 255, 255, 0.08); /* 半透明按鈕/卡片底 */
     --border-subtle: rgba(255, 255, 255, 0.12); /* 半透明邊框 */
+    --border-soft: rgba(255, 255, 255, 0.1); /* preset tab 外框 */
+    --border-strong: rgba(255, 255, 255, 0.25); /* checkbox 邊框 */
+    --border-date: #333; /* 日期選擇器邊框 */
     --table-divider: #2a2d3c; /* 表格欄位分隔線 */
+
+    /* 陰影 */
+    --shadow-overlay:
+        0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.15); /* 半透明按鈕預設 */
+    --shadow-overlay-active:
+        0 2px 10px rgba(169, 96, 248, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15); /* 半透明按鈕 active */
+    --shadow-primary-inset: inset 0 1px 0 rgba(255, 255, 255, 0.2); /* 主色按鈕內陰影 */
+
+    /* 主色透明態 */
+    --color-primary-soft: rgba(169, 96, 248, 0.18);
+    --color-primary-soft-hover: rgba(169, 96, 248, 0.28);
+    --color-primary-focus: rgba(169, 96, 248, 0.5);
 
     /* 版面尺寸 */
     --sidebar-width: 240px;
     --header-height: 64px;
+    --control-height: 40px; /* 按鈕、輸入框統一高度 */
+
+    /* 間距 */
+    --space-xs: 8px;
+    --space-sm: 12px;
+
+    /* 字級 */
+    --font-size-body: 13px;
+    --font-line-body: 16px;
 
     /* 圓角 */
+    --radius-sm: 8px; /* icon 容器 */
     --radius-md: 12px; /* 卡片、選單項 */
     --radius-lg: 16px; /* 膠囊按鈕 */
+    --radius-pill: 999px; /* 全圓角 tab */
 
     /* 選單 active 背景 */
     --menu-item-active-bg:
@@ -46,4 +73,11 @@
     --chart-red: #e63757;
     --chart-purple: #d462f2;
     --chart-blue: #6fa9ff;
+    /* 時間軸事件色 */
+    --timeline-loss: #e74c3c;
+    --timeline-unbelievable: #b30cfb;
+    --timeline-victory: #48c9b0;
+    --timeline-deposit: #509adb;
+    --timeline-shop: #a960f8;
+    --timeline-system: #a960f8;
 }
