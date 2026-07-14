@@ -1,0 +1,324 @@
+/* 全站 Data Table 共用樣式（不依賴 mixin，避免 @use 模組拿不到） */
+
+.dataTable {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--dark-neutral-900);
+}
+
+.dataTable__scroll {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dataTable__head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 40px;
+    position: relative;
+    box-sizing: border-box;
+    background: var(--dark-neutral-900);
+    border: 1px solid var(--dark-neutral-700);
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+}
+
+.dataTable__headLabel {
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    line-height: var(--font-line-body);
+    color: var(--text-secondary);
+}
+
+.dataTable__cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    height: 100%;
+    min-width: 0;
+    position: static;
+    box-sizing: border-box;
+    padding: 0 12px;
+    color: var(--text-primary);
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    border-right: 1px solid var(--table-divider);
+
+    &:last-child {
+        border-right: none;
+    }
+
+    &.is-sortable {
+        justify-content: space-between;
+        gap: 8px;
+    }
+}
+
+.dataTable__sortBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 20px;
+    height: 20px;
+    position: static;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.55;
+
+    &.is-active {
+        opacity: 1;
+    }
+}
+
+.dataTable__sortUp,
+.dataTable__sortDown {
+    display: block;
+    width: 20px;
+    height: 10px;
+    position: static;
+    box-sizing: border-box;
+}
+
+.dataTable__sortUp {
+    background: url("@/assets/arrorUp.svg") center no-repeat;
+}
+
+.dataTable__sortDown {
+    background: url("@/assets/arrorDown.svg") center no-repeat;
+}
+
+.dataTable__body {
+    width: 100%;
+    height: auto;
+    position: static;
+    box-sizing: border-box;
+    border: 1px solid var(--dark-neutral-700);
+    border-top: none;
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    overflow: hidden;
+    background: transparent;
+}
+
+.dataTable__row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 36px;
+    position: relative;
+    box-sizing: border-box;
+    background: var(--dark-neutral-700);
+
+    &.is-alt {
+        background: var(--dark-neutral-800);
+    }
+}
+
+.dataTable__empty {
+    margin: 0;
+    padding: 32px 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 13px;
+}
+
+.dataTable__pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 48px;
+    position: static;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    padding: 0 12px;
+    background: var(--dark-neutral-900);
+    gap: 12px;
+
+    @media (max-width: 767px) {
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+        padding: 12px 0 0;
+        gap: 10px;
+    }
+}
+
+.dataTable__pagerMain {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    min-width: 0;
+    flex-wrap: wrap;
+
+    @media (max-width: 767px) {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+.dataTable__pagerIcon,
+.dataTable__pagerNum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    position: static;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.dataTable__pagerIcon {
+    border: 0.5px solid var(--border-subtle);
+    background: var(--surface-overlay);
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.dataTable__pagerNum {
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.is-active {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+.dataTable__pagerEllipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    padding: 0 2px;
+    user-select: none;
+}
+
+.dataTable__pagerJump {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+
+    @media (max-width: 767px) {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+.dataTable__pagerJumpLabel {
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.dataTable__pagerJumpInput {
+    width: 80px;
+    height: 32px;
+    position: static;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--dark-neutral-700);
+    color: var(--text-primary);
+    font-size: 12px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+        border-color: var(--border-subtle);
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+}
+
+.dataTable--grid {
+    .dataTable__head,
+    .dataTable__row {
+        display: grid;
+        height: auto;
+        min-height: 40px;
+    }
+
+    .dataTable__head {
+        align-items: center;
+    }
+
+    .dataTable__row {
+        align-items: center;
+        min-height: 52px;
+        border-top: 1px solid var(--table-divider);
+    }
+
+    .dataTable__cell {
+        height: auto;
+        padding: 14px 12px;
+        border-right: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dataTable__body {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+.dataTable--grid.sessionTable {
+    .dataTable__head,
+    .dataTable__row {
+        grid-template-columns: 1.4fr 1fr 1fr 0.8fr 0.9fr 0.9fr;
+        min-width: 860px;
+    }
+}

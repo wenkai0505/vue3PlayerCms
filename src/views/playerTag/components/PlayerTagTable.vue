@@ -1,21 +1,15 @@
 <template>
-    <section class="tagTableWrap">
+    <section class="tagTableWrap dataTable">
         <section class="tagTable">
-            <header class="tableHead">
-                <div
-                    class="tableCell colTag sortable"
-                    v-for="title in tableHeadTitles"
-                    :key="title.key"
-                >
-                    {{ title.label }}
-                    <div class="sortArrows" @click.stop="handleSort(title.key)">
-                        <span class="sortArrowUp"></span>
-                        <span class="sortArrowDown"></span>
-                    </div>
-                </div>
-            </header>
+            <DataTableHead
+                class="tagTableHead"
+                :columns="columns"
+                :sort-by="sortBy"
+                :sort-order="sortOrder"
+                @sort-change="handleSortChange"
+            />
 
-            <div class="tableBody">
+            <div class="tableBody dataTable__body">
                 <div
                     v-for="(row, index) in rows"
                     :key="row.id"
@@ -23,8 +17,11 @@
                     :class="{ isExpanded: isExpanded(row.id) }"
                 >
                     <article
-                        class="tableRow"
-                        :class="{ isAlt: index % 2 === 1 }"
+                        class="tableRow dataTable__row"
+                        :class="{
+                            'is-alt': index % 2 === 1,
+                            isAlt: index % 2 === 1,
+                        }"
                         @click="toggleRow(row.id)"
                     >
                         <div class="mobileRow">
@@ -65,7 +62,9 @@
                             </div>
                         </div>
 
-                        <div class="tableCell colTag desktopOnly">
+                        <div
+                            class="tableCell dataTable__cell colTag desktopOnly"
+                        >
                             <div class="tagPill">
                                 <span
                                     class="tagDot"
@@ -75,11 +74,15 @@
                             </div>
                         </div>
 
-                        <div class="tableCell colName desktopOnly">
+                        <div
+                            class="tableCell dataTable__cell colName desktopOnly"
+                        >
                             {{ row.playerName }}
                         </div>
 
-                        <div class="tableCell colCountry desktopOnly">
+                        <div
+                            class="tableCell dataTable__cell colCountry desktopOnly"
+                        >
                             <span class="countryPill">
                                 <span class="countryDot"></span>
                                 <span class="countryText">{{
@@ -88,7 +91,9 @@
                             </span>
                         </div>
 
-                        <div class="tableCell colTime desktopOnly">
+                        <div
+                            class="tableCell dataTable__cell colTime desktopOnly"
+                        >
                             {{ row.modifiedAt }}
                         </div>
                     </article>
@@ -109,78 +114,21 @@
             </div>
         </section>
 
-        <footer class="tablePager">
-            <div class="pager">
-                <button
-                    class="pagerIcon"
-                    type="button"
-                    :disabled="page <= 1"
-                    @click="handlePageChange(1)"
-                >
-                    «
-                </button>
-                <button
-                    class="pagerIcon"
-                    type="button"
-                    :disabled="page <= 1"
-                    @click="handlePageChange(page - 1)"
-                >
-                    ‹
-                </button>
-                <template
-                    v-for="(item, index) in pageItems"
-                    :key="`${item}-${index}`"
-                >
-                    <span v-if="item === 'ellipsis'" class="pagerEllipsis"
-                        >...</span
-                    >
-                    <button
-                        v-else
-                        class="pagerNum"
-                        :class="{ pagerNumActive: item === page }"
-                        type="button"
-                        @click="handlePageChange(item)"
-                    >
-                        {{ item }}
-                    </button>
-                </template>
-                <button
-                    class="pagerIcon"
-                    type="button"
-                    :disabled="page >= totalPages"
-                    @click="handlePageChange(page + 1)"
-                >
-                    ›
-                </button>
-                <button
-                    class="pagerIcon"
-                    type="button"
-                    :disabled="page >= totalPages"
-                    @click="handlePageChange(totalPages)"
-                >
-                    »
-                </button>
-            </div>
-            <div class="pagerJump">
-                <span class="pagerJumpLabel">前往頁數</span>
-                <input
-                    v-model="jumpPage"
-                    class="pagerJumpInput"
-                    type="number"
-                    min="1"
-                    :max="totalPages"
-                    @keyup.enter="handleJumpPage"
-                />
-            </div>
-        </footer>
+        <DataTablePagination
+            :page="page"
+            :page-size="pageSize"
+            :total="total"
+            @page-change="emit('page-change', $event)"
+        />
     </section>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref } from "vue";
+import DataTableHead from "@/components/table/DataTableHead.vue";
+import DataTablePagination from "@/components/table/DataTablePagination.vue";
 import PlayerTagEditPanel from "./PlayerTagEditPanel.vue";
-import type { TableHeadTitles } from "@/types/playerTag";
-
+import type { DataTableColumn } from "@/types/table";
 import type {
     PlayerTagRow,
     PlayerTagSortField,
@@ -198,24 +146,6 @@ interface Props {
     sortOrder?: SortOrder;
     tagNames?: PlayerTagNameItem[];
 }
-const tableHeadTitles: TableHeadTitles[] = [
-    {
-        label: "標籤",
-        key: "tagName",
-    },
-    {
-        label: "名稱",
-        key: "playerName",
-    },
-    {
-        label: "國家",
-        key: "country",
-    },
-    {
-        label: "修改時間",
-        key: "modifiedAt",
-    },
-];
 
 const props = withDefaults(defineProps<Props>(), {
     loading: false,
@@ -231,61 +161,22 @@ const emit = defineEmits<{
     (e: "sort-change", sortBy: PlayerTagSortField, sortOrder: SortOrder): void;
 }>();
 
-const expandedId = ref<string | null>(null);
-const jumpPage = ref(String(props.page));
-
-const totalPages = computed(() => {
-    if (props.total <= 0) return 1;
-    return Math.ceil(props.total / props.pageSize);
-});
-
-const pageItems = computed(() => {
-    const current = props.page;
-    const last = totalPages.value;
-    const items: Array<number | "ellipsis"> = [];
-    if (last <= 9) {
-        return Array.from({ length: last }, (_, index) => index + 1);
-    }
-    const pages = new Set<number>([1, last]);
-    for (let i = current - 2; i <= current + 2; i += 1) {
-        if (i >= 1 && i <= last) pages.add(i);
-    }
-    const sorted = [...pages].sort((a, b) => a - b);
-    sorted.forEach((pageNum, index) => {
-        const prevPage = sorted[index - 1];
-        if (index > 0 && prevPage !== undefined && pageNum - prevPage > 1) {
-            items.push("ellipsis");
-        }
-        items.push(pageNum);
-    });
-    return items;
-});
-
-watch(
-    () => props.page,
-    (value) => {
-        jumpPage.value = String(value);
+const columns: Array<DataTableColumn<PlayerTagSortField>> = [
+    { key: "tagName", label: "標籤", width: "26%", className: "colTag" },
+    { key: "playerName", label: "名稱", width: "26%", className: "colName" },
+    { key: "country", label: "國家", width: "24%", className: "colCountry" },
+    {
+        key: "modifiedAt",
+        label: "修改時間",
+        width: "24%",
+        className: "colTime",
     },
-);
+];
 
-const handleSort = (field: PlayerTagSortField) => {
-    if (props.sortBy === field) {
-        const nextOrder: SortOrder = props.sortOrder === "asc" ? "desc" : "asc";
-        emit("sort-change", field, nextOrder);
-        return;
-    }
-    emit("sort-change", field, "asc");
-};
+const expandedId = ref<string | null>(null);
 
-const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages.value || page === props.page) return;
-    emit("page-change", page);
-};
-
-const handleJumpPage = () => {
-    const target = Number(jumpPage.value);
-    if (!target || Number.isNaN(target)) return;
-    handlePageChange(target);
+const handleSortChange = (sortBy: PlayerTagSortField, sortOrder: SortOrder) => {
+    emit("sort-change", sortBy, sortOrder);
 };
 
 const isExpanded = (id: string) => expandedId.value === id;
@@ -324,273 +215,212 @@ const handleDelete = (row: PlayerTagRow) => {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-
-    .tableHead {
-        @include flex(center, flex-start);
-        @include box(100%, 40px);
-        background: var(--dark-neutral-900);
-        border-top-left-radius: var(--radius-md);
-        border-top-right-radius: var(--radius-md);
-        border: 1px solid var(--dark-neutral-700);
-
-        @include mobile {
-            display: none;
-        }
-
-        @include pad {
-            min-width: 640px;
-        }
-
-        .sortLabel {
-            color: inherit;
-        }
-
-        .sortable {
-            @include flex(center, space-between);
-            .sortArrows {
-                @include box(20px, 20px, static);
-                cursor: pointer;
-                .sortArrowUp {
-                    @include box(20px, 10px, static);
-                    display: block;
-                    background: url("@/assets/arrorUp.svg") center no-repeat;
-                }
-                .sortArrowDown {
-                    @include box(20px, 10px, static);
-                    display: block;
-                    background: url("@/assets/arrorDown.svg") center no-repeat;
-                }
-            }
-        }
-    }
-
-    .tableBody {
-        @include box(100%, auto, static);
-        border-bottom-left-radius: var(--radius-md);
-        border-bottom-right-radius: var(--radius-md);
-        border: 1px solid var(--dark-neutral-700);
-        border-top: none;
-        overflow: hidden;
-        background: transparent;
-
-        @include mobile {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 0;
-            border: none;
-            background: transparent;
-        }
-
-        @include pad {
-            min-width: 640px;
-        }
-    }
-
-    .tableItem {
-        @include mobile {
-            border: 1px solid var(--dark-neutral-700);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            background: var(--dark-neutral-800);
-            transition: border-color 0.15s ease;
-
-            &.isExpanded {
-                border-color: rgba(169, 96, 248, 0.45);
-            }
-        }
-
-        &:last-child {
-            border-bottom: none;
-        }
-    }
-
-    .tableRow {
-        @include flex(center, flex-start);
-        @include box(100%, 36px);
-        cursor: pointer;
-        background: var(--dark-neutral-700);
-
-        @include mobile {
-            display: block;
-            height: auto;
-            background: transparent;
-        }
-
-        @include pad {
-            min-width: 640px;
-        }
-
-        .colTime {
-            color: var(--text-secondary);
-        }
-    }
-
-    .tableRow.isAlt {
-        background: var(--dark-neutral-800);
-
-        @include mobile {
-            background: transparent;
-        }
-    }
-
-    .desktopOnly {
-        @include mobile {
-            display: none !important;
-        }
-    }
-
-    .tableCell {
-        @include flex(center, flex-start);
-        @include box(auto, 100%, static);
-        padding: 0 12px;
-        color: var(--text-primary);
-        font-size: 12px;
-        line-height: 16px;
-        white-space: nowrap;
-        border-right: 1px solid var(--table-divider);
-
-        &:last-child {
-            border-right: none;
-        }
-
-        &.desktopOnly {
-            @include mobile {
-                display: none !important;
-            }
-        }
-    }
-
-    .mobileRow {
-        display: none;
-
-        @include mobile {
-            @include flex(stretch, flex-start);
-            width: 100%;
-            padding: 12px 12px 12px 0;
-            gap: 0;
-        }
-    }
-
-    .mobileAccent {
-        @include box(4px, auto, static);
-        flex-shrink: 0;
-        border-radius: 0 4px 4px 0;
-        margin-right: 12px;
-    }
-
-    .mobileMain {
-        flex: 1;
-        min-width: 0;
-        padding-right: 4px;
-    }
-
-    .mobileTop {
-        @include flex(center, space-between);
-        gap: 8px;
-        margin-bottom: 6px;
-    }
-
-    .mobileName {
-        color: var(--text-primary);
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 18px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .mobileChevron {
-        @include box(20px, 20px, static);
-        @include flex;
-        flex-shrink: 0;
-        border: 0.5px solid var(--border-subtle);
-        border-radius: 50%;
-        background: var(--surface-overlay);
-        transition: transform 0.2s ease;
-
-        &::after {
-            content: "";
-            width: 6px;
-            height: 6px;
-            border-right: 1.5px solid var(--text-secondary);
-            border-bottom: 1.5px solid var(--text-secondary);
-            transform: rotate(45deg) translate(-1px, -1px);
-        }
-
-        &.isExpanded {
-            transform: rotate(180deg);
-        }
-    }
-
-    .mobileMeta {
-        @include flex(center, flex-start);
-        gap: 8px;
-        min-width: 0;
-        flex-wrap: wrap;
-    }
-
-    .mobileTagName {
-        color: var(--text-secondary);
-        font-size: 11px;
-        line-height: 14px;
-        white-space: nowrap;
-    }
-
-    .mobileDivider {
-        @include box(1px, 12px, static);
-        flex-shrink: 0;
-        background: var(--table-divider);
-    }
-
-    .mobileTime {
-        margin-left: auto;
-        flex-shrink: 0;
-        color: var(--text-secondary);
-        font-size: 11px;
-        line-height: 14px;
-        white-space: nowrap;
-    }
-
-    .colTag {
-        width: 26%;
-    }
-
-    .colName {
-        width: 26%;
-    }
-
-    .colCountry {
-        width: 24%;
-    }
-
-    .colTime {
-        width: 24%;
-    }
 }
 
-.tablePager {
-    @include box(100%, 48px, static);
-    @include flex(center, space-between);
-    flex-shrink: 0;
-    padding: 0 12px;
-    background: var(--dark-neutral-900);
-    gap: 12px;
-
+:deep(.tagTableHead) {
     @include mobile {
-        flex-direction: column;
-        align-items: stretch;
-        height: auto;
-        padding: 12px 0 0;
-        gap: 10px;
+        display: none;
     }
 
     @include pad {
-        flex-wrap: wrap;
-        height: auto;
-        padding: 12px;
+        min-width: 640px;
     }
+}
+
+.tableBody {
+    @include box(100%, auto, static);
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    border: 1px solid var(--dark-neutral-700);
+    border-top: none;
+    overflow: hidden;
+    background: transparent;
+
+    @include mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    @include pad {
+        min-width: 640px;
+    }
+}
+
+.tableItem {
+    @include mobile {
+        border: 1px solid var(--dark-neutral-700);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--dark-neutral-800);
+        transition: border-color 0.15s ease;
+
+        &.isExpanded {
+            border-color: rgba(169, 96, 248, 0.45);
+        }
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.tableRow {
+    @include flex(center, flex-start);
+    @include box(100%, 36px);
+    cursor: pointer;
+    background: var(--dark-neutral-700);
+
+    @include mobile {
+        display: block;
+        height: auto;
+        background: transparent;
+    }
+
+    @include pad {
+        min-width: 640px;
+    }
+
+    .colTime {
+        color: var(--text-secondary);
+    }
+}
+
+.tableRow.isAlt,
+.tableRow.is-alt {
+    background: var(--dark-neutral-800);
+
+    @include mobile {
+        background: transparent;
+    }
+}
+
+.desktopOnly {
+    @include mobile {
+        display: none !important;
+    }
+}
+
+.tableCell {
+    @include flex(center, flex-start);
+    @include box(auto, 100%, static);
+    padding: 0 12px;
+    color: var(--text-primary);
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    border-right: 1px solid var(--table-divider);
+
+    &:last-child {
+        border-right: none;
+    }
+}
+
+.mobileRow {
+    display: none;
+
+    @include mobile {
+        @include flex(stretch, flex-start);
+        width: 100%;
+        padding: 12px 12px 12px 0;
+        gap: 0;
+    }
+}
+
+.mobileAccent {
+    @include box(4px, auto, static);
+    flex-shrink: 0;
+    border-radius: 0 4px 4px 0;
+    margin-right: 12px;
+}
+
+.mobileMain {
+    flex: 1;
+    min-width: 0;
+    padding-right: 4px;
+}
+
+.mobileTop {
+    @include flex(center, space-between);
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.mobileName {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mobileChevron {
+    @include box(20px, 20px, static);
+    @include flex;
+    flex-shrink: 0;
+    border: 0.5px solid var(--border-subtle);
+    border-radius: 50%;
+    background: var(--surface-overlay);
+    transition: transform 0.2s ease;
+
+    &::after {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-right: 1.5px solid var(--text-secondary);
+        border-bottom: 1.5px solid var(--text-secondary);
+        transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    &.isExpanded {
+        transform: rotate(180deg);
+    }
+}
+
+.mobileMeta {
+    @include flex(center, flex-start);
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.mobileTagName {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 14px;
+}
+
+.mobileDivider {
+    @include box(1px, 10px, static);
+    background: var(--dark-neutral-700);
+}
+
+.mobileTime {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 14px;
+    white-space: nowrap;
+}
+
+.colTag {
+    width: 26%;
+}
+
+.colName {
+    width: 26%;
+}
+
+.colCountry {
+    width: 24%;
+}
+
+.colTime {
+    width: 24%;
 }
 
 .tagPill {
@@ -678,117 +508,6 @@ const handleDelete = (row: PlayerTagRow) => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-}
-
-.pager {
-    @include flex(center, flex-start);
-    gap: 6px;
-    min-width: 0;
-    flex-wrap: wrap;
-
-    @include mobile {
-        justify-content: center;
-        width: 100%;
-    }
-}
-
-.pagerIcon,
-.pagerNum {
-    @include box(28px, 28px, static);
-    @include flex;
-    flex-shrink: 0;
-    border: none;
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text-primary);
-    font-size: 12px;
-    line-height: 1;
-    cursor: pointer;
-    transition:
-        background 0.15s ease,
-        opacity 0.15s ease;
-}
-
-.pagerIcon {
-    border: 0.5px solid var(--border-subtle);
-    background: var(--surface-overlay);
-
-    &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.12);
-    }
-
-    &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-}
-
-.pagerNum {
-    &:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
-}
-
-.pagerNumActive {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.pagerEllipsis {
-    @include flex;
-    min-width: 20px;
-    color: var(--text-secondary);
-    font-size: 12px;
-    padding: 0 2px;
-    user-select: none;
-}
-
-.pagerJump {
-    @include flex(center, flex-start);
-    gap: 8px;
-    flex-shrink: 0;
-
-    @include mobile {
-        justify-content: center;
-        width: 100%;
-    }
-}
-
-.pagerJumpLabel {
-    color: var(--text-secondary);
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.pagerJumpInput {
-    @include box(80px, 32px, static);
-    padding: 0 12px;
-    border: 1px solid transparent;
-    border-radius: 12px;
-    background: var(--dark-neutral-700);
-    color: var(--text-primary);
-    font-size: 12px;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.15s ease;
-
-    &:focus {
-        border-color: var(--border-subtle);
-    }
-
-    &::placeholder {
-        color: var(--text-secondary);
-    }
-
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    &[type="number"] {
-        -moz-appearance: textfield;
-        appearance: textfield;
     }
 }
 </style>
