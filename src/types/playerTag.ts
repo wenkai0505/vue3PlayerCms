@@ -1,3 +1,7 @@
+import type { DataTableColumn, SortOrder } from "@/types/table";
+
+export type { SortOrder };
+
 export type PlayerTagColor = string;
 
 export interface PlayerTagRow {
@@ -18,7 +22,6 @@ export type PlayerTagSortField =
     | "playerName"
     | "country"
     | "modifiedAt";
-export type SortOrder = "asc" | "desc";
 
 export interface PlayerTagListQuery {
     keyword?: string;
@@ -100,7 +103,4 @@ export interface BatchDeletePlayerTagResponse {
     deletedCount: number;
 }
 
-export interface TableHeadTitles {
-    label: string;
-    key: PlayerTagSortField;
-}
+export type TableHeadTitles = DataTableColumn<PlayerTagSortField>;

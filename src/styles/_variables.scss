@@ -1,8 +1,8 @@
 :root {
     /* 深色底層 */
-    --dark-neutral-900: #121826; /* 表頭、奇數列、輸入框底 */
-    --dark-neutral-800: #1a2033; /* 偶數列、彈窗底 */
-    --dark-neutral-700: #242b42; /* 邊框、分隔線 */
+    --dark-neutral-900: #121826; /* 表頭、輸入框底 */
+    --dark-neutral-800: #1a2033; /* 偶數 row（is-alt）、彈窗底 */
+    --dark-neutral-700: #242b42; /* 奇數 row、邊框、分隔線 */
 
     /* 主色 */
     --color-primary: #a960f8; /* 品牌紫 */

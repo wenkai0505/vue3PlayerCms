@@ -12,6 +12,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BaseField: typeof import('./src/components/form/BaseField.vue')['default']
+    DataTableHead: typeof import('./src/components/table/DataTableHead.vue')['default']
+    DataTablePagination: typeof import('./src/components/table/DataTablePagination.vue')['default']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     FeatureUnderDevelopment: typeof import('./src/components/common/FeatureUnderDevelopment.vue')['default']

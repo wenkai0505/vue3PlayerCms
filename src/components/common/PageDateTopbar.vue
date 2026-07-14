@@ -181,7 +181,8 @@ const handleDateRangeChange = (value: [string, string] | null) => {
     @include flex(center, space-between);
     width: 100%;
     min-width: 0;
-    gap: 12px;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
 
     @include mobile {
         flex-direction: column;
@@ -192,7 +193,7 @@ const handleDateRangeChange = (value: [string, string] | null) => {
         @include flex(center, flex-start);
         flex: 1;
         min-width: 0;
-        gap: 8px;
+        gap: var(--space-xs);
         flex-wrap: wrap;
     }
 
@@ -200,11 +201,11 @@ const handleDateRangeChange = (value: [string, string] | null) => {
         @include flex;
         gap: 4px;
         width: 240px;
-        height: 40px;
+        height: var(--control-height);
         padding: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 999px;
-        background: #121826;
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-pill);
+        background: var(--dark-neutral-900);
         box-sizing: border-box;
         flex-shrink: 0;
 
@@ -214,19 +215,14 @@ const handleDateRangeChange = (value: [string, string] | null) => {
 
         .presetTab {
             @include flex;
+            @include text-body-bold;
             flex: 1;
-            min-width: 0;
-            height: 32px;
+            height: 100%;
             border: 0;
-            border-radius: 16px;
+            border-radius: var(--radius-pill);
             background: transparent;
-            color: #555;
-            font-family: Inter, sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 16px;
+            color: var(--text-placeholder);
             cursor: pointer;
-            white-space: nowrap;
 
             &:disabled {
                 cursor: not-allowed;
@@ -234,112 +230,76 @@ const handleDateRangeChange = (value: [string, string] | null) => {
             }
 
             &.isActive {
-                border-radius: 999px;
-                color: #fff;
-                background: linear-gradient(
-                    156.8deg,
-                    var(--color-primary-grad-from) 0%,
-                    var(--color-primary-grad-to) 100%
-                );
-                box-shadow: var(--shadow-primary-inset);
+                background: var(--color-primary);
+                color: var(--text-primary);
             }
         }
     }
 
     .dateWrap {
-        width: 240px;
-        flex-shrink: 0;
+        flex: 1;
+        min-width: 240px;
+        max-width: 320px;
 
         @include mobile {
             width: 100%;
+            max-width: none;
         }
 
-        /*
-         * Figma Input 774:64306
-         * bg #121826 / border #333 / radius 20px / padding 8 16 / 13px Bold 白字
-         * EP 根節點同時是 .el-date-editor + .el-input__wrapper
-         */
-        :deep(.dateRangeField.el-date-editor) {
-            width: 100% !important;
-            height: 40px !important;
-            min-height: 40px !important;
-            padding: 8px 16px !important;
-            gap: 8px;
-            border: 0 !important;
-            border-radius: 20px !important;
-            background-color: #121826 !important;
-            box-shadow: 0 0 0 1px #333 inset !important;
-            box-sizing: border-box;
-            cursor: pointer;
-            --el-date-editor-width: 100%;
-            --el-input-bg-color: #121826;
-            --el-input-border-color: #333;
-            --el-input-hover-border-color: #444;
-            --el-input-focus-border-color: #a960f8;
-            --el-fill-color-blank: #121826;
-            --el-text-color-regular: #fff;
-            --el-text-color-placeholder: #757575;
+        // EP 2.x：dateRangeField 在 Tooltip 內層 trigger，需 :deep 才能套到
+        :deep(.dateRangeField) {
+            @include box(100%, var(--control-height));
+            padding: 0 16px;
+            border: 0;
+            border-radius: 20px;
+            background: var(--dark-neutral-900) !important;
+            box-shadow: 0 0 0 1px var(--border-date) inset !important;
 
             &:hover,
             &.is-active,
             &.is-focus {
-                background-color: #121826 !important;
-                box-shadow: 0 0 0 1px #a960f8 inset !important;
-            }
-
-            &.is-disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-
-            .el-range__icon {
-                @include flex;
-                flex-shrink: 0;
-                width: 20px;
-                height: 20px;
-                margin: 0;
-                color: #fff;
-
-                .dateIcon {
-                    display: block;
-                }
+                background: var(--dark-neutral-900) !important;
+                box-shadow: 0 0 0 1px var(--border-date) inset !important;
             }
 
             .el-range-input {
-                flex: 1;
-                min-width: 0;
-                width: auto;
-                color: #fff;
-                font-family: Inter, sans-serif;
-                font-size: 13px;
-                font-weight: 700;
-                line-height: 16px;
+                @include text-body-bold;
+                color: var(--text-primary);
                 background: transparent;
 
                 &::placeholder {
-                    color: #757575;
+                    color: var(--text-placeholder);
                 }
             }
 
             .el-range-separator {
+                @include text-body-bold;
                 flex: 0;
                 padding: 0 4px;
-                color: #fff;
-                font-family: Inter, sans-serif;
-                font-size: 13px;
-                font-weight: 700;
-                line-height: 16px;
+                color: var(--text-primary);
             }
 
             .el-range__close-icon {
                 display: none;
             }
+
+            .el-range__icon,
+            .el-input__icon {
+                @include flex;
+                margin-right: 6px;
+                color: var(--text-primary);
+            }
+        }
+
+        .dateIcon {
+            color: var(--text-primary);
+            flex-shrink: 0;
         }
     }
 
     .barActions {
         @include flex(center, flex-end);
-        gap: 12px;
+        gap: var(--space-sm);
         flex-shrink: 0;
 
         .filterWrap {
@@ -347,7 +307,7 @@ const handleDateRangeChange = (value: [string, string] | null) => {
 
             .filterPanel {
                 position: absolute;
-                top: calc(100% + 8px);
+                top: calc(100% + var(--space-xs));
                 right: 0;
                 z-index: 30;
             }
@@ -355,7 +315,7 @@ const handleDateRangeChange = (value: [string, string] | null) => {
 
         .iconBtn {
             @include flex;
-            @include box(40px, 40px);
+            @include box(var(--control-height), var(--control-height));
             @include overlay-btn;
             font-size: 18px;
 
@@ -375,110 +335,54 @@ const handleDateRangeChange = (value: [string, string] | null) => {
 <!-- popup 被 teleported 到 body，需 global style -->
 <style lang="scss">
 .datePickerPop {
-    --el-datepicker-active-color: #a960f8;
-    --el-datepicker-hover-text-color: #ffffff;
-    --el-datepicker-inrange-bg-color: rgba(169, 96, 248, 0.18);
-    --el-datepicker-inrange-hover-bg-color: rgba(169, 96, 248, 0.28);
-    --el-bg-color-overlay: #1a2033;
-    --el-text-color-primary: #ffffff;
-    --el-text-color-regular: #adb3d4;
-    --el-text-color-secondary: #757575;
-    --el-border-color-light: #242b42;
-    --el-fill-color-blank: #121826;
-    --el-fill-color-light: #242b42;
-    --el-color-primary: #a960f8;
+    --el-datepicker-active-color: var(--color-primary);
+    --el-datepicker-hover-text-color: var(--text-primary);
+    --el-datepicker-inrange-bg-color: var(--color-primary-soft);
+    --el-datepicker-inrange-hover-bg-color: var(--color-primary-soft-hover);
+    --el-bg-color-overlay: var(--dark-neutral-800);
+    --el-text-color-primary: var(--text-primary);
+    --el-text-color-regular: var(--text-secondary);
+    --el-text-color-secondary: var(--text-placeholder);
+    --el-border-color-light: var(--dark-neutral-700);
+    --el-fill-color-blank: var(--dark-neutral-900);
+    --el-fill-color-light: var(--dark-neutral-700);
+    --el-color-primary: var(--color-primary);
 
-    border: 1px solid #242b42 !important;
-    border-radius: 12px !important;
-    background: #1a2033 !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid var(--dark-neutral-700) !important;
+    background: var(--dark-neutral-800) !important;
 
-    &.el-popper.is-light {
-        border-color: #242b42 !important;
-        background: #1a2033 !important;
+    .el-picker-panel__body {
+        background: var(--dark-neutral-800);
     }
 
-    .el-popper__arrow::before {
-        border-color: #242b42 !important;
-        background: #1a2033 !important;
+    .el-date-table td.available:hover .el-date-table-cell__text {
+        color: var(--text-primary);
     }
 
-    .el-picker-panel {
-        border: 0;
-        background: transparent;
-        color: #fff;
+    .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+        background-color: var(--color-primary);
+        color: var(--text-primary);
     }
 
-    .el-date-range-picker__content.is-left {
-        border-right: 1px solid #242b42;
-    }
-
-    .el-date-range-picker__header,
-    .el-picker-panel__icon-btn:hover {
-        color: #fff;
+    .el-date-table td.in-range .el-date-table-cell {
+        background-color: var(--color-primary-soft);
     }
 
     .el-picker-panel__icon-btn {
-        color: #adb3d4;
+        color: var(--text-secondary);
+
+        &:hover {
+            color: var(--text-primary);
+        }
+    }
+
+    .el-date-range-picker__header {
+        color: var(--text-primary);
     }
 
     .el-date-table th {
-        color: #757575;
-        border-bottom-color: #242b42;
-    }
-
-    .el-date-table td {
-        color: #fff;
-
-        &.next-month,
-        &.prev-month {
-            color: #555;
-        }
-
-        &.today .el-date-table-cell__text {
-            color: #a960f8;
-            font-weight: 700;
-        }
-
-        &.in-range .el-date-table-cell {
-            background-color: rgba(169, 96, 248, 0.18);
-        }
-
-        &.start-date .el-date-table-cell__text,
-        &.end-date .el-date-table-cell__text,
-        &.current:not(.disabled) .el-date-table-cell__text {
-            background: linear-gradient(157deg, #a178f9 0%, #a45df7 100%);
-            color: #fff;
-        }
-    }
-
-    .el-date-table-cell__text {
-        border-radius: 999px;
-    }
-
-    .el-picker-panel__footer {
-        border-top: 1px solid #242b42;
-        background: #1a2033;
-    }
-
-    .el-picker-panel__link-btn,
-    .el-button.is-text {
-        color: #adb3d4;
-
-        &:hover {
-            color: #fff;
-        }
-    }
-
-    .el-button.is-plain {
-        border-color: #242b42;
-        color: #fff;
-        background: #121826;
-
-        &:hover {
-            border-color: #a960f8;
-            background: rgba(169, 96, 248, 0.12);
-        }
+        color: var(--text-secondary);
+        border-bottom-color: var(--dark-neutral-700);
     }
 }
 </style>
