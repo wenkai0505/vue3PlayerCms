@@ -1,79 +1,884 @@
+````md
 ---
 alwaysApply: true
 ---
 
-# Vue3 Frontend Rules
+# Vue3 前端開發規範
 
-## Tech Stack
+## 1. 基本技術原則
 
-This project uses:
+依照目前專案實際存在的 Vue3 技術棧進行開發。
 
-* Vue3
-* vue-router
-* TypeScript
-* Vite
-* Pinia
-* SCSS
-* Element Plus
-* Vant
-* Axios
+常用技術：
 
-Always generate code based on this stack.
+- Vue3
+- vue-router
+- TypeScript
+- Vite
+- SCSS
+- Axios
 
-## Vue
+不要假設所有 Vue3 專案一定需要：
 
-* Use Vue3 Composition API.
-* Always use `<script setup lang="ts">`.
-* Avoid Options API.
-* Keep components readable and practical.
-* Prefer simple structure over over-engineering.
+- Pinia
+- Element Plus
+- Vant
+- TailwindCSS
+- 其他第三方套件
 
-## TypeScript
+只有符合以下其中一項時才能導入：
 
-* Prefer explicit typing when it improves readability.
-* Avoid `any` unless necessary.
-* Use interfaces for API response data.
-* Explicitly type refs when needed.
+- 專案目前已經使用
+- 功能明確需要
+- 開發者明確要求
 
-Example:
+不要因為套件常見或屬於 Vue 生態系，就自行加入專案。
 
-```ts
-const list = ref<GameItem[]>([])
-const isOpen = ref<boolean>(false)
+---
+
+## 2. 現有專案優先
+
+開發前必須先檢查目前 Repository。
+
+確認：
+
+- 現有目錄結構
+- 現有命名方式
+- 現有 Component 寫法
+- 現有 Router 寫法
+- 現有 TypeScript 寫法
+- 現有狀態管理方式
+- 現有共用工具
+
+如果既有專案已經形成慣例：
+
+**優先遵循既有專案。**
+
+不要為了套用本 Rule 而強制重構既有專案。
+
+---
+
+## 3. Vue 開發方式
+
+預設使用：
+
+`<script setup lang="ts">`
+
+並遵循：
+
+- 使用 Vue3 Composition API
+- 使用 TypeScript
+- 優先使用 `ref`、`reactive`、`computed`、`watch`
+- 避免 Options API
+- Component 保持簡單、清楚、容易維護
+- 避免過度抽象
+- 避免沒有實際需求的架構設計
+
+如果既有專案使用不同方式，以既有專案為優先。
+
+---
+
+## 4. 標準目錄習慣
+
+當專案沒有其他既有規範時，優先使用：
+
+```text
+src/
+├── apis/
+├── assets/
+├── components/
+├── layout/
+├── router/
+├── types/
+├── utils/
+└── views/
+```
+````
+
+不要只是為了讓專案結構看起來完整，就建立沒有實際用途的檔案。
+
+資料夾可以依專案需要存在，但只有真正有內容需求時才建立實際檔案。
+
+---
+
+## 5. View 頁面結構
+
+頁面預設使用：
+
+```text
+src/views/<pageName>/index.vue
 ```
 
-## Naming
+例如：
 
-Use clear and practical naming.
-
-API functions:
-
-```ts
-getHomeBannerApi()
-getCategoryListApi()
+```text
+src/views/
+├── homeView/
+│   └── index.vue
+├── aboutView/
+│   └── index.vue
+└── newsView/
+    └── index.vue
 ```
 
-Event handlers:
+頁面專用 Component 放在：
 
-```ts
-handleOpenMenu()
-handleCloseMenu()
-handleClickCategory()
-handleSubmit()
+```text
+src/views/<pageName>/components/
 ```
 
-Stores:
+例如：
 
-```ts
-useBannerStore()
-useUserStore()
-useCategoryStore()
+```text
+src/views/homeView/
+├── index.vue
+└── components/
+    ├── HomeBanner.vue
+    ├── HomeTeam.vue
+    └── HomeNews.vue
 ```
 
-## Code Quality
+只有該頁面使用的 Component，不要一開始就放到全域 `src/components/`。
 
-* Remove unused imports.
-* Avoid duplicated logic.
-* Extract reusable logic into `composables`.
-* Keep page components clean.
-* Do not create unnecessary abstraction.
+---
+
+## 6. 共用 Component
+
+真正跨頁使用的 Component 放在：
+
+```text
+src/components/
+```
+
+例如：
+
+```text
+src/components/
+├── ProductCard.vue
+├── NewsCard.vue
+└── EmptyState.vue
+```
+
+只有符合以下情況才考慮提升為共用 Component：
+
+- 兩個以上頁面重複使用
+- UI 與功能責任明確
+- 抽離後能降低重複程式
+- 抽離後能提升維護性
+
+不要因為「未來可能會共用」就提前放進共用目錄。
+
+---
+
+## 7. Layout
+
+當專案採用 Layout 架構時：
+
+Layout 主入口：
+
+```text
+src/layout/index.vue
+```
+
+Layout 專用 Component：
+
+```text
+src/layout/components/
+```
+
+例如：
+
+```text
+src/layout/
+├── index.vue
+└── components/
+    ├── AppHeader.vue
+    ├── AppFooter.vue
+    └── FloatServiceButton.vue
+```
+
+Layout 主要負責：
+
+- Header
+- Footer
+- RouterView
+- 全站固定 UI
+- 全站共同頁面框架
+
+不要把單一頁面的 Business Logic 放進 Layout。
+
+---
+
+## 8. Router
+
+當專案沒有其他既有 Router 規範時，優先採：
+
+```text
+Layout
+└── children
+    ├── Home
+    ├── About
+    ├── News
+    └── ...
+```
+
+Page Component 優先使用 lazy import。
+
+例如：
+
+```ts
+{
+    path: "/",
+    component: () => import("@/layout/index.vue"),
+    children: [
+        {
+            path: "",
+            name: "home",
+            component: () => import("@/views/homeView/index.vue"),
+        },
+    ],
+}
+```
+
+不要在沒有實際需求時提前建立：
+
+- Navigation Guard
+- 權限系統
+- 複雜 `route.meta`
+- 多層 Router abstraction
+- Typed Router 架構
+- 多個 Router config layer
+
+有需求再增加。
+
+---
+
+## 9. Component 命名
+
+Vue Component 檔名使用 PascalCase。
+
+例如：
+
+```text
+AppHeader.vue
+AppFooter.vue
+HomeBanner.vue
+ProductCard.vue
+NewsList.vue
+```
+
+命名應能直接反映 Component 用途。
+
+避免：
+
+```text
+Box.vue
+Item.vue
+Block.vue
+Common.vue
+Component1.vue
+```
+
+等無法辨識實際責任的名稱。
+
+---
+
+## 10. View 命名
+
+頁面目錄依目前專案習慣使用：
+
+```text
+<pageName>View
+```
+
+例如：
+
+```text
+homeView/
+aboutView/
+newsView/
+productView/
+```
+
+入口統一：
+
+```text
+index.vue
+```
+
+如果既有專案已採其他命名方式，維持既有專案一致性。
+
+---
+
+## 11. Event Handler 命名
+
+事件處理 Function 優先使用：
+
+```text
+handle + 動作 + 對象
+```
+
+例如：
+
+```ts
+handleOpenMenu();
+handleCloseMenu();
+handleClickCategory();
+handleChangeTab();
+handleSubmit();
+handleScrollTop();
+```
+
+避免：
+
+```ts
+click();
+doIt();
+test();
+open();
+func1();
+```
+
+等語意不清楚的命名。
+
+---
+
+## 12. Boolean 命名
+
+Boolean State 優先使用：
+
+```text
+is
+has
+can
+should
+```
+
+例如：
+
+```ts
+const isOpen = ref(false);
+const isLoading = ref(false);
+const hasMore = ref(true);
+const canSubmit = computed(() => ...);
+```
+
+避免使用無法辨識 Boolean 意義的名稱。
+
+---
+
+## 13. TypeScript
+
+TypeScript 以提升可讀性與安全性為目的。
+
+遵循：
+
+- 避免不必要的 `any`
+- 在有明確資料結構時定義型別
+- `ref` 在需要時指定型別
+- Props / Emits 使用適當型別
+- API Request / Response 使用適當型別
+
+例如：
+
+```ts
+interface NewsItem {
+    id: number;
+    title: string;
+    image: string;
+}
+
+const list = ref<NewsItem[]>([]);
+const isOpen = ref<boolean>(false);
+```
+
+簡單且 TypeScript 可以清楚推論的型別，不需要為了形式而全部顯式標註。
+
+例如：
+
+```ts
+const isOpen = ref(false);
+```
+
+是可以接受的。
+
+---
+
+## 14. Type 放置原則
+
+只屬於單一 Component 或單一頁面的 Type：
+
+可以留在功能附近。
+
+例如：
+
+```ts
+interface TeamMember {
+    name: string;
+    image: string;
+}
+```
+
+如果只有 `HomeTeam.vue` 使用，可以直接放在該 Component。
+
+真正跨頁、跨功能共用的 Type，再放：
+
+```text
+src/types/
+```
+
+不要因為 `src/types/` 已存在，就強制把所有 interface 集中進去。
+
+---
+
+## 15. Props
+
+Props 使用 TypeScript 定義。
+
+例如：
+
+```ts
+interface Props {
+    title: string;
+    disabled?: boolean;
+}
+
+const props = defineProps<Props>();
+```
+
+不要建立過度複雜的 Props。
+
+如果需要傳遞大量資料，先確認：
+
+- Component 是否拆分合理
+- 資料是否應以 Object 傳遞
+- 是否真的需要這麼多 Props
+
+不要為了避免 Props 而直接改用 Pinia。
+
+---
+
+## 16. Emits
+
+事件使用明確命名。
+
+例如：
+
+```ts
+const emit = defineEmits<{
+    close: [];
+    submit: [value: string];
+}>();
+```
+
+Parent / Child 能使用 Props + Emits 解決時：
+
+優先使用 Props + Emits。
+
+不要為了避免正常的 Component 資料流而直接使用全域 State。
+
+---
+
+## 17. Local State
+
+只屬於 Component 或單一頁面的 State：
+
+優先使用：
+
+- `ref`
+- `reactive`
+- `computed`
+
+例如：
+
+- Menu 開關
+- Dialog 開關
+- Tab
+- Local Search
+- Form
+- Loading
+- Carousel Index
+- Hover State
+
+不要因為資料是 reactive，就自動建立 Store。
+
+---
+
+## 18. Component 拆分
+
+不要過度 Component 化。
+
+適合拆 Component：
+
+- 多處重複使用
+- 有明確 UI 職責
+- Parent Component 已經過長
+- 有獨立且有意義的邏輯
+- 拆分後可以明顯提升可讀性
+- 區塊未來需要獨立維護
+
+例如：
+
+```text
+HomeBanner
+HomeTeam
+HomeNews
+AppHeader
+AppFooter
+```
+
+不建議：
+
+- 幾行 HTML 就建立 Component
+- 純裝飾線條建立 Component
+- 每一個文字區塊都拆 Component
+- 每一個 button 都建立專案專用 Component
+- 沒有重用價值卻強制拆分
+- 為了讓目錄看起來漂亮而拆分
+
+---
+
+## 19. 頁面專用與共用 Component 判斷
+
+只有單一頁面使用：
+
+```text
+views/<pageName>/components/
+```
+
+多頁共用：
+
+```text
+src/components/
+```
+
+Layout 專用：
+
+```text
+src/layout/components/
+```
+
+不要把所有 Component 全部放在同一層。
+
+也不要過早判定某 Component 未來會共用。
+
+---
+
+## 20. Composable
+
+不要看到邏輯就自動抽成 Composable。
+
+適合建立 Composable：
+
+- 多個 Component 重複使用
+- 邏輯具有一定複雜度
+- 有生命週期管理
+- 有 Event Listener cleanup
+- 有 Timer cleanup
+- 有重複的 API / Pagination / Loading 邏輯
+- 抽離後能明顯改善可讀性
+
+例如：
+
+```text
+useScrollReveal()
+usePagination()
+useWindowSize()
+```
+
+前提是專案真的有重用需求。
+
+簡單且只屬於單一頁面的邏輯：
+
+保留在 Component 即可。
+
+---
+
+## 21. Composable 目錄
+
+如果專案目前不存在：
+
+```text
+src/composables/
+```
+
+不要預先建立。
+
+第一次真正需要 Composable 時再建立。
+
+不要為了符合 Vue3 最佳實務而強制加入。
+
+---
+
+## 22. Pinia
+
+Pinia 不屬於所有 Vue3 專案的必要技術。
+
+只有真正存在：
+
+- 跨頁共享 State
+- 多個無直接父子關係 Component 共用 State
+- Authentication
+- User Information
+- Global Settings
+- 其他真正全域資料
+
+才考慮使用 Pinia。
+
+如果目前專案沒有 Pinia：
+
+不要自行安裝。
+
+先提出：
+
+1. 為什麼 Local State 不足
+2. 為什麼 Props / Emits 不適合
+3. 為什麼需要 Store
+
+經確認後再導入。
+
+Pinia 詳細規則由 API / State Rule 負責。
+
+---
+
+## 23. DOM 操作
+
+Vue Component 中優先使用 Vue 資料流。
+
+避免直接：
+
+```ts
+document.querySelector(...)
+element.remove()
+element.style...
+```
+
+如果只是 UI State，優先使用：
+
+- `ref`
+- `v-if`
+- `v-show`
+- `:class`
+- `:style`
+
+例如：
+
+不要：
+
+```ts
+element.style.display = "none";
+```
+
+優先：
+
+```vue
+<div v-if="isOpen">
+```
+
+但如果第三方 Library、動畫或特殊功能確實需要 DOM：
+
+可以使用 Template Ref 與 Vue lifecycle。
+
+不要為了完全避免 DOM 而把簡單功能複雜化。
+
+---
+
+## 24. Lifecycle
+
+與 DOM、Animation、Event Listener、Timer 有關的功能：
+
+必須考慮 Vue Lifecycle。
+
+例如：
+
+```ts
+onMounted(() => {
+    // 初始化
+});
+
+onUnmounted(() => {
+    // cleanup
+});
+```
+
+必須注意清理：
+
+- `setInterval`
+- `setTimeout`
+- Event Listener
+- IntersectionObserver
+- ResizeObserver
+- Animation instance
+- 第三方 Plugin
+
+避免元件卸載後仍持續執行。
+
+---
+
+## 25. 重複邏輯
+
+發現重複程式時：
+
+先確認是否真的具有相同責任。
+
+如果確實重複：
+
+可以考慮：
+
+- 共用 Component
+- Composable
+- Utility
+
+不要看到兩段相似程式就立即抽象。
+
+抽離後必須比原本更容易理解與維護。
+
+---
+
+## 26. Utils
+
+真正無 UI、無 Vue State、可獨立使用的純 Function，可以放：
+
+```text
+src/utils/
+```
+
+例如：
+
+- 日期格式化
+- 數字格式化
+- 字串處理
+- 純資料轉換
+
+不要把：
+
+- Component Logic
+- API
+- Store
+- Vue Lifecycle Logic
+
+全部塞進 `utils/`。
+
+如果目前沒有 Utility 需求，不需要建立檔案。
+
+---
+
+## 27. Assets
+
+圖片與前端素材優先放在：
+
+```text
+src/assets/
+```
+
+除非素材需要固定公開 URL，才考慮：
+
+```text
+public/
+```
+
+不要直接依賴：
+
+```text
+reference/
+```
+
+或其他開發參考資料夾。
+
+素材目錄依專案實際需求建立。
+
+不要提前建立大量空的：
+
+```text
+images/
+icons/
+fonts/
+video/
+```
+
+等目錄。
+
+---
+
+## 28. 第三方套件
+
+加入新的 npm package 之前：
+
+先確認：
+
+1. 目前專案是否已有相同功能
+2. 原生 Vue / JS 是否可以簡單完成
+3. 套件是否真的能降低維護成本
+4. 是否會增加不必要依賴
+
+不要因為某功能常見就自動安裝 Library。
+
+例如：
+
+簡單 Carousel 不一定需要 Swiper。
+
+簡單 Scroll Animation 不一定需要 AOS 或 GSAP。
+
+依實際需求決定。
+
+---
+
+## 29. Code Quality
+
+開發完成後至少確認：
+
+- 移除 unused import
+- 移除未使用 variable
+- 避免 duplicated logic
+- 沒有明顯 TypeScript error
+- 沒有 Vue warning
+- 沒有不必要的 console
+- 沒有無用途的註解
+- 命名清楚
+- Component 容易閱讀
+- 沒有為未來需求提前抽象
+- 沒有破壞現有專案架構
+
+---
+
+## 30. 修改既有程式
+
+修改既有功能時：
+
+優先採用最小必要修改。
+
+不要因為處理一個功能，同時：
+
+- 重寫附近 Component
+- 更換架構
+- 改變命名風格
+- 搬動大量檔案
+- 更新無關套件
+- 順便進行大型 Refactor
+
+如果發現值得重構：
+
+先提出建議，等待確認。
+
+---
+
+## 31. 核心原則
+
+Vue3 開發的優先順序：
+
+1. 現有專案一致性
+2. 功能正確
+3. 可讀性
+4. 可維護性
+5. 適當重用
+6. 架構抽象
+
+不要反過來為了架構而犧牲簡單性。
+
+最終目標：
+
+**讓程式簡單、清楚、穩定，團隊接手時容易理解與維護。**
+
+```
+
+```

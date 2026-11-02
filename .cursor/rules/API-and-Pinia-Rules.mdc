@@ -2,62 +2,362 @@
 alwaysApply: true
 ---
 
-# API and Pinia Rules
+# API 與 State 開發規範
 
-## API Folder
+## API 目錄
 
-API files must be placed in:
+所有 API 檔案統一放在：
 
-```txt
-src/apis
-```
+src/apis/
 
-Do not create a `services` folder unless specifically requested.
+依功能或模組拆分 API 檔案。
 
-Example:
+例如：
 
-```ts
-// src/apis/banner.ts
+src/apis/
+├── home.ts
+├── news.ts
+├── product.ts
+└── contact.ts
+
+不要自行建立：
+
+src/services/
+repository/
+domain/
+usecase/
+
+等額外 API 架構，除非既有專案已經使用，或使用者明確要求。
+
+---
+
+## API 固定寫法
+
+API Function 統一使用具名 export。
+
+命名格式：
+
+動作 + 功能名稱 + Api
+
+例如：
+
+getHomeBannerApi()
+getNewsListApi()
+getNewsDetailApi()
+postContactApi()
+updateMemberApi()
+deleteFavoriteApi()
+
+API Function 主要負責定義 Request：
 
 export const getBannerApi = () => {
-  return request.get('/banner')
+return request({
+url: "/banner",
+method: "GET",
+});
+};
+
+有 Params：
+
+export const getNewsListApi = (params: NewsListParams) => {
+return request({
+url: "/news",
+method: "GET",
+params,
+});
+};
+
+有 Body：
+
+export const postContactApi = (data: ContactRequest) => {
+return request({
+url: "/contact",
+method: "POST",
+data,
+});
+};
+
+保持 API Function 簡單。
+
+不要在 API Function 裡處理：
+
+- UI State
+- Dialog
+- Router
+- DOM
+- Component State
+- 複雜資料轉換
+- 與 Request 無關的業務邏輯
+
+---
+
+## Request / Axios
+
+如果專案已經存在 request wrapper：
+
+優先使用既有 request wrapper。
+
+例如：
+
+request({
+url: "/banner",
+method: "GET",
+});
+
+不要在不同 API 檔案自行：
+
+import axios from "axios";
+
+然後直接：
+
+axios.get(...)
+axios.post(...)
+
+避免同一專案存在多套 Request 寫法。
+
+如果專案目前尚未建立 request wrapper：
+
+不要自行假設 wrapper 的位置與格式。
+
+第一次實作 API 前：
+
+1. 檢查目前專案
+2. 確認 API Base URL
+3. 確認 Request / Response 格式
+4. 確認 Token / Header 需求
+5. 提出最小 request wrapper 方案
+6. 經確認後再建立
+
+---
+
+## HTTP Method 對應
+
+GET：
+
+request({
+url: "/xxx",
+method: "GET",
+params,
+});
+
+POST：
+
+request({
+url: "/xxx",
+method: "POST",
+data,
+});
+
+PUT：
+
+request({
+url: "/xxx",
+method: "PUT",
+data,
+});
+
+PATCH：
+
+request({
+url: "/xxx",
+method: "PATCH",
+data,
+});
+
+DELETE：
+
+request({
+url: "/xxx",
+method: "DELETE",
+params,
+});
+
+依後端 API Specification 為準，不要自行改變後端定義。
+
+---
+
+## API Type
+
+Request / Response 有明確資料結構時使用 TypeScript 型別。
+
+例如：
+
+interface NewsListParams {
+page: number;
+pageSize: number;
 }
-```
 
-## Axios
+interface NewsItem {
+id: number;
+title: string;
+image: string;
+}
 
-* Use the existing Axios/request wrapper.
-* Do not call Axios directly inside Vue components.
-* API functions should only handle request definitions.
+避免不必要的 any。
+
+如果 Type 只屬於單一 API 或功能，可以放在功能附近。
+
+真正被多個功能共用的 Type，再放：
+
+src/types/
+
+不要因為 src/types/ 存在，就強制把所有 interface 都移進去。
+
+---
+
+## Component 呼叫 API
+
+Vue Component 不直接使用 Axios。
+
+不要：
+
+axios.get("/news");
+
+應呼叫：
+
+getNewsListApi();
+
+簡單且只屬於單一頁面的資料流：
+
+Component
+→ API
+
+可以接受。
+
+例如：
+
+const getNewsList = async () => {
+try {
+const res = await getNewsListApi(params);
+
+        list.value = res.data;
+    } catch (error) {
+        console.error(error);
+    }
+
+};
+
+不需要為了架構漂亮，強制變成：
+
+Component
+→ Composable
+→ Store
+→ API
+
+---
+
+## Composable
+
+當 API 邏輯具有以下情況時，再考慮 Composable：
+
+- 多個 Component 重複使用
+- Loading / Error / Pagination 邏輯需要重用
+- 資料處理較複雜
+- 抽離後能明顯改善 Component 可讀性
+
+資料流可以是：
+
+Component
+→ Composable
+→ API
+
+簡單單頁 API 不需要強制 Composable。
+
+---
 
 ## Pinia
 
-Use Pinia only for shared global state.
+Pinia 只處理真正需要跨頁或跨 Component 共享的 State。
 
-Suitable for Pinia:
+適合：
 
-* user info
-* auth state
-* banner data
-* category data
-* global settings
+- User Info
+- Authentication State
+- 跨頁共用資料
+- Global Settings
+- 多個無直接父子關係 Component 共用的資料
 
-Avoid Pinia for page-only state, such as:
+不適合：
 
-* dialog open/close
-* local search keyword
-* current tab
-* temporary form state
+- Dialog 開關
+- Local Search Keyword
+- Current Tab
+- Temporary Form State
+- Page-only Loading
+- 單頁 UI State
 
-## Data Flow
+這些優先使用：
 
-Preferred flow:
+ref()
+reactive()
 
-```txt
-component
-→ composable or store
-→ apis
-→ request
-```
+如果目前專案沒有使用 Pinia：
 
-Keep API logic out of templates and components when possible.
+不要自行安裝或建立 Store。
+
+必須先確認是否真的存在跨頁共享 State 的需求。
+
+---
+
+## Store 與 API
+
+如果資料確實需要由 Store 管理：
+
+Component
+→ Store
+→ API
+
+例如：
+
+Component：
+
+const userStore = useUserStore();
+
+await userStore.getUserInfo();
+
+Store：
+
+const getUserInfo = async () => {
+const res = await getUserInfoApi();
+
+    userInfo.value = res.data;
+
+};
+
+API：
+
+export const getUserInfoApi = () => {
+return request({
+url: "/user/info",
+method: "GET",
+});
+};
+
+不要把 Request Definition 直接散落在 Store 裡。
+
+---
+
+## 核心原則
+
+API：
+負責 Request Definition。
+
+Component：
+負責頁面顯示與頁面互動。
+
+Composable：
+負責可重用的功能邏輯。
+
+Pinia：
+負責真正需要共享的 State。
+
+選擇滿足目前需求的最簡單資料流。
+
+不要為了符合固定架構而強制增加：
+
+- Store
+- Composable
+- Service Layer
+- Repository
+- Domain
+- UseCase
